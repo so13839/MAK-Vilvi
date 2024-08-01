@@ -4,11 +4,8 @@ library(data.table) # For efficient data handling
 library(fs) # For file system operations
 library(ggplot2) # For advanced plotting
 
-# List all files under the input directory
-#dir_ls("/Users/opiyo.1/Downloads", recurse = TRUE)
-
-# Load the data with fread for efficiency
-merged_data = fread("merged_dataset.csv")
+#Load data
+merged_data <- read_csv("merged_dataset.csv")
 
 # Display the first few rows of the dataset
 head(merged_data)
@@ -19,15 +16,10 @@ merged_data <- merged_data %>%
                         "Malawi", "Mauritius", "Morocco", "Namibia", "Nigeria",
                         "South Africa", "Tunisia", "Uganda"))
 
-
-
-
 # Print column names
 columns <- colnames(merged_data)
 print(columns)
 
-# Drop the "Isolate Id" column
-merged_data <- merged_data[, !"Isolate Id"]
 
 # List of columns to drop
 columns_to_drop <- c(
@@ -41,8 +33,6 @@ columns_to_drop <- c(
   'Ceftibuten', 'Ceftibuten avibactam', 'Tebipenem'
 )
 
-# Drop the specified columns
-merged_data <- merged_data[, !columns_to_drop, with = FALSE]
 
 # Analyze categorical columns
 for (col in names(merged_data)[sapply(merged_data, is.character)]) {
@@ -105,27 +95,6 @@ na_counts <- sapply(merged_data2[, "Cefixime_I", with = FALSE], function(x) sum(
 # Ensure na_counts is a data frame
 na_counts_df <- data.frame(Column = names(na_counts), NaN_Count = na_counts)
 
-# Plotting the number of NaNs in categorical columns
-ggplot(na_counts_df, aes(x = Column, y = NaN_Count)) +
-  geom_bar(stat = "identity", fill = "skyblue") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title = "Number of NaNs in Categorical Columns", x = "Categorical Columns", y = "Number of NaNs")
-
-# Select only the categorical columns
-categorical_columns <- merged_data2 %>% select(where(is.character))
-
-# Plot value counts for each categorical column
-for (column_name in names(categorical_columns)) {
-  value_counts <- table(categorical_columns[[column_name]], useNA = "ifany")
-  
-  value_counts_df <- data.frame(Value = names(value_counts), Count = as.vector(value_counts))
-  
-  ggplot(value_counts_df, aes(x = Value, y = Count)) +
-    geom_bar(stat = "identity", fill = "skyblue") +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(title = paste("Counts of", column_name), x = column_name, y = "Counts") +
-    print()
-}
 
 # Impute missing values in numerical columns with the median
 numeric_columns <- c('Temperature', 'CO2 Emissions', 'Sea Level Rise', 'Precipitation', 'Humidity', 'Wind Speed')
@@ -173,9 +142,6 @@ print(names(merged_data2))
 #Select Acinetobacter baumannii bacteria
 Acinetobacter_baumannii <- subset(merged_data2, Species == "Acinetobacter baumannii")
 
-#Select Acinetobacter baumannii bacteria
-Acinetobacter_baumannii <- subset(merged_data2, Species == "Acinetobacter baumannii")
-
 #Final dataset
 Acinetobacter_baumannii_Final <- data.frame(Acinetobacter_baumannii[,c(6,8:9,13,24,27,48:53)])
 
@@ -184,7 +150,7 @@ Acinetobacter_baumannii_Final <- data.frame(Acinetobacter_baumannii[,c(6,8:9,13,
 #For multiple columns
 # Load necessary library
 library(dplyr)
-library(mice)
+
 
 # Function to impute missing categorical variables in a data frame
 impute_categorical_proportion <- function(df) {
@@ -335,9 +301,3 @@ sapply(2:length(rs),function(i) lines.roc(rs[[i]],col=i))
 #Select Escherichia colibacteria bacteria
 Escherichia_coli <- subset(merged_data2, Species == "Escherichia coli")
 
-#Select Klebsiella pneumoniae  bacteria
-Klebsiella_pneumoniae  <- subset(merged_data2, Species == "Klebsiella pneumoniae")
-
-#Final dataset
-Klebsiella_pneumoniae_Final <- data.frame(Klebsiella_pneumoniae[,c(6,8:10,13,15,20,24,48:53)])
-names(Klebsiella_pneumoniae_Final)
